@@ -1,0 +1,20 @@
+To dos for the game
+
+[] Deploy game as an executable
+    [] Windows
+    [] Mac
+
+Characters:
+[] spritessheets for Grandma
+[] spritesheets for reindeer
+[] spritesheets for terrain objects
+[] 
+
+Game Play: 
+[x] Move player object based on user input
+[x] Keep all players inbounds on the board.
+[] Make player collide with other objects on the board
+[] Make Terrain objects
+[] Grandma characters runs away from deer character
+    [x] distance trigger -- turn grandma a color when I get too close
+    [] don't get stuck in the corners

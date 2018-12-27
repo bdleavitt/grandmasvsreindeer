@@ -176,6 +176,8 @@ class NonPlayer(Player):
         self.is_dead = False
         self.dead_counter = 0
         self.destroyed = False
+        self.played_alert = 0
+        self.granny_alert = pygame.mixer.Sound(os.path.join('sound','granny_alert.wav'))
 
         sprite_sheet = SpriteSheet(os.path.join('art', self.char_type, 'sprite_sheet.png'))
         
@@ -186,7 +188,7 @@ class NonPlayer(Player):
             # flip right images to get left images
             image = pygame.transform.flip(image, True, False)
             self.walking_frames_l.append(image)
-      
+                  
         for n in range(0,5):
             # get right alert images
             image = sprite_sheet.get_image(n * 32, 1 * 32, 32, 32)
@@ -202,7 +204,7 @@ class NonPlayer(Player):
             up_image = sprite_sheet.get_image(n * 32, 4 * 32, 32, 32)
             self.walking_frames_u.append(up_image)
         
-            stand_image = sprite_sheet.get_image(0 * 32, 2 * 32, 32, 32)
+            stand_image = self.walking_frames_l[0]
             self.standing_frames.append(stand_image)
             
             die_image = sprite_sheet.get_image(n * 32, 0 * 32, 32, 32)
@@ -232,7 +234,7 @@ class NonPlayer(Player):
             x2, y2, = self.player_character.rect.center
             self.radians = calc_radians(x1, y1, x2, y2)
 
-    def danger_close(self, threshold=150):
+    def danger_close(self, threshold=120):
         self.check_distance()
         if self.distance_from_player >= threshold:
             return False
@@ -264,6 +266,9 @@ class NonPlayer(Player):
                 self.destroy()
 
         elif self.danger_close():
+            if self.played_alert == 0:
+                self.played_alert = 1
+                pygame.mixer.Sound.play(self.granny_alert)
             self.check_radians()
             self.change_x = self.move_speed * math.cos(self.radians)
             self.change_y = self.move_speed * math.sin(self.radians)
@@ -273,6 +278,7 @@ class NonPlayer(Player):
             else:
                 self.get_next_sprite(self.alerted_frames_l)
         else:  
+            self.played_alert = 0
             self.get_next_sprite(self.standing_frames)
             self.change_x = 0
             self.change_y = 0

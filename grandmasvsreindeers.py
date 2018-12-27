@@ -14,17 +14,19 @@ pygame.font.init()
 myfont = pygame.font.SysFont('Arial', 20)
 
 
-def create_grannies(granny_list, player):
+def create_grannies(granny_list, player, x = None, y = None):
     ## see how many grannies there are in play
     ## if there are fewer grannies than the granny count, create more grannies
     num_grannies_to_create = constants.GRANNY_COUNT - len(granny_list)
-      
+    
     ## create the grannies
     for n in range(num_grannies_to_create):
-        rand_x = random.randint(0, constants.WINDOW_WIDTH - 32)
-        rand_y = random.randint(0, constants.WINDOW_HEIGHT - 32)
+        if x is None: 
+            x = random.randint(0, constants.WINDOW_WIDTH - 32)
+        if y is None: 
+            y = random.randint(0, constants.WINDOW_HEIGHT - 32)
         
-        granny = NonPlayer(rand_x, rand_y, 'grandma')
+        granny = NonPlayer(x, y, 'grandma')
         granny.player_character = player
         granny_list.add(granny)
 
@@ -34,27 +36,57 @@ def score_finished_screen(screen, score):
 
     # show the score centered on the screen
     score_font = pygame.font.SysFont('Arial', 40)
-    textsurface = myfont.render(f"You hit {score:.0f} grannies. Nice work. Press any key to play again", False, (255, 255, 255))
+    textsurface = myfont.render(f"You hit {score:.0f} grannies. Nice work.", False, (255, 255, 255))
     screen.blit(textsurface, ((constants.WINDOW_WIDTH - textsurface.get_width()) / 2, constants.WINDOW_HEIGHT / 2))
     pygame.display.flip()
     # put reindeer and a grandma on either part of the screen
 
-    pygame.time.delay(3000)
+    pygame.time.wait(3000)
+    pygame.event.clear()
+    textsurface = myfont.render(f"Press any key to play again.", False, (255, 255, 255))
+    screen.blit(textsurface, ((constants.WINDOW_WIDTH - textsurface.get_width()) / 2, (constants.WINDOW_HEIGHT / 2) + textsurface.get_height()))
+    pygame.display.flip()
     any_key = False
+
     while not(any_key):
         for event in pygame.event.get():
             # Exit main loop on quit event
-            if event.type == pygame.KEYUP or pygame.KEYDOWN:
+            if event.type == pygame.KEYUP or event.type == pygame.KEYDOWN:
                 any_key = True
     
     ready_to_play_screen()
 
 def ready_to_play_screen():
+    screen.fill((0,0,0))
+    pygame.display.flip()
+ 
+    pygame.time.wait(2000)
+
     constants.GRANNY_COUNT = 1
     pygame.mixer.init()
     pygame.mixer.music.load(os.path.join('sound','grandma_got_runover_by_a_reindeer.mp3'))
     pygame.mixer.music.play(-1)
+    
+    pygame.event.clear()
+    textsurface = myfont.render(f"Ready, Player One!", False, (255, 255, 255))
+    screen.blit(textsurface, ((constants.WINDOW_WIDTH - textsurface.get_width()) / 2, (constants.WINDOW_HEIGHT / 2) - textsurface.get_height()))
+    pygame.display.flip()
+
+    pygame.time.wait(2000)
+    textsurface = myfont.render(f"Press any key to start.", False, (255, 255, 255))
+    screen.blit(textsurface, ((constants.WINDOW_WIDTH - textsurface.get_width()) / 2, (constants.WINDOW_HEIGHT / 2) + textsurface.get_height()))
+    pygame.display.flip()
+    
+    any_key = False
+
+    while not(any_key):
+        for event in pygame.event.get():
+            # Exit main loop on quit event
+            if event.type == pygame.KEYUP or event.type == pygame.KEYDOWN:
+                any_key = True
+
     run_game()
+
 
 def run_game():
     ## SETUP
@@ -64,10 +96,10 @@ def run_game():
     player_list = pygame.sprite.Group()
     granny_list = pygame.sprite.Group()
     
-    player = Player(constants.WINDOW_WIDTH / 2, constants.WINDOW_HEIGHT / 2, 'deer')
+    player = Player(constants.WINDOW_WIDTH * .33, constants.WINDOW_HEIGHT / 2, 'deer')
 
     ## Create the number of grannies needed:
-    create_grannies(granny_list, player)
+    create_grannies(granny_list, player, constants.WINDOW_WIDTH * .66, constants.WINDOW_HEIGHT /2)
     player_list.add(player)
     player.block_list = granny_list
 
@@ -83,6 +115,7 @@ def run_game():
         seconds = constants.ROUND_LENGTH - round((pygame.time.get_ticks() - start_tick)/1000, 0)
 
         if seconds <= 0:
+            done = True
             score_finished_screen(screen, score)
 
         ## GET USER INPUTS
